@@ -14,7 +14,7 @@ jobs:
 
       - name: Install TTS
         run: |
-          python3 -m pip install --quiet edge-tts
+          python3 -m pip install --quiet torch torchaudio soundfile
 
       - name: Install ffmpeg (static build)
         timeout-minutes: 6

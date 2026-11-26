@@ -36,12 +36,9 @@ const tf = (n, t) => { const p = path.join(TMP, n); fs.writeFileSync(p, t); retu
 await tts(s.text, TMP, rawWav);
 const padWav = TMP + `/vp${i}.wav`;
 
-// Магия зловещего голоса:
-// asetrate=44100*0.9 - понижает тон на 10%
-// aecho - добавляет эхо (задержка 60мс)
-// apad - добавляет 0.5 сек тишины в конце
-ff(['-y', '-i', rawWav, '-af', 'asetrate=44100*0.88,aresample=44100,aecho=0.8:0.88:60:0.4,atempo=1.12,apad=pad_dur=0.5', '-ar', '44100', '-ac', '1', padWav]);
-
+// Голос старого сказочника: понижаем тон, замедляем речь, добавляем паузу
+ff(['-y', '-i', rawWav, '-af', 'asetrate=44100*0.82,aresample=44100,atempo=0.95,apad=pad_dur=0.8', '-ar', '44100', '-ac', '1', padWav]);
+    
 audioSegs.push(padWav);
 const sDur = dur(padWav);
 

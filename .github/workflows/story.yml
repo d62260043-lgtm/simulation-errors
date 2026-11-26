@@ -14,8 +14,6 @@ jobs:
 
       - name: Install TTS
         run: |
-          - name: Install TTS
-          run: |
           python3 -m pip install --quiet torch torchaudio soundfile omegaconf
 
       - name: Install ffmpeg (static build)

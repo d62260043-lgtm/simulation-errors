@@ -52,7 +52,7 @@ const tf = (n, t) => { const p = path.join(TMP, n); fs.writeFileSync(p, t); retu
     let vf = `scale=4000:-1,zoompan=z='${zoomExpr}':d=1:s=${W}x${H}:fps=${FPS}`;
     
     if (s.zoom === 'shake') {
-       vf += `,crop=iw-30:ih-30:15+random(1)*15:15+random(1)*15,scale=${W}:${H}`;
+   vf = `scale=4000:-1,zoompan=z='min(1.2,1+0.002*sin(on/2))':d=1:s=${W}x${H}:fps=${FPS}`;
     }
 
     const lines = s.text.match(/.{1,25}(\s|$)/g) || [s.text];

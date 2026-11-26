@@ -15,10 +15,15 @@ jobs:
       - name: Install TTS
         run: |
           python3 -m pip install --quiet edge-tts
-          
-      - name: Install ffmpeg
+
+      - name: Install ffmpeg (static build)
+        timeout-minutes: 6
         run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          curl -sL https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-linux64-gpl.tar.xz -o /tmp/ff.tar.xz
+          mkdir -p /tmp/ff && tar xf /tmp/ff.tar.xz -C /tmp/ff --strip-components=1
+          sudo cp "$(find /tmp/ff -name ffmpeg -type f | head -1)" /usr/local/bin/ffmpeg
+          sudo cp "$(find /tmp/ff -name ffprobe -type f | head -1)" /usr/local/bin/ffprobe
+          ffmpeg -version | head -1
 
       - name: Build Video
         run: node story_maker.js

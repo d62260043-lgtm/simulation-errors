@@ -33,11 +33,17 @@ const tf = (n, t) => { const p = path.join(TMP, n); fs.writeFileSync(p, t); retu
     console.log(`[Сцена ${i+1}/${ep.scenes.length}] Озвучка...`);
     
     const rawWav = TMP + `/v${i}.wav`;
-    await tts(s.text, TMP, rawWav);
-    const padWav = TMP + `/vp${i}.wav`;
-    ff(['-y', '-i', rawWav, '-af', 'apad=pad_dur=0.5', '-ar', '44100', '-ac', '1', padWav]);
-    audioSegs.push(padWav);
-    const sDur = dur(padWav);
+await tts(s.text, TMP, rawWav);
+const padWav = TMP + `/vp${i}.wav`;
+
+// Магия зловещего голоса:
+// asetrate=44100*0.9 - понижает тон на 10%
+// aecho - добавляет эхо (задержка 60мс)
+// apad - добавляет 0.5 сек тишины в конце
+ff(['-y', '-i', rawWav, '-af', 'asetrate=44100*0.88,aresample=44100,aecho=0.8:0.88:60:0.4,atempo=1.12,apad=pad_dur=0.5', '-ar', '44100', '-ac', '1', padWav]);
+
+audioSegs.push(padWav);
+const sDur = dur(padWav);
 
     const imgPath = path.join(TMP, `img_${i}.jpg`);
     fs.copyFileSync(s.image, imgPath); 

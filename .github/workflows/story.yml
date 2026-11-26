@@ -1,0 +1,30 @@
+name: story-video
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install TTS
+        run: |
+          python3 -m pip install --quiet edge-tts
+          
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Build Video
+        run: node story_maker.js
+
+      - name: Save artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-video
+          path: episode_1_final.mp4

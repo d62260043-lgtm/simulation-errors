@@ -2,35 +2,44 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const VOICE = process.env.TTS_VOICE || 'ru-RU-DmitryNeural';
-const RATE = process.env.TTS_RATE || '+5%';
+// Голос: aidar или baya (baya звучит чуть спокойнее/старше)
+const SPEAKER = process.env.TTS_SPEAKER || 'baya';
 
 async function tts(text, tmp, outWav) {
-  const mp3 = path.join(tmp, 'tts_' + Date.now() + '.mp3');
-  let lastErr = null;
+  const rawWav = path.join(tmp, 'raw_' + Date.now() + '.wav');
+  const txtFile = path.join(tmp, 'say_' + Date.now() + '.txt');
+  fs.writeFileSync(txtFile, text);
 
-    for (let attempt = 1; attempt <= 5; attempt++) {
-    const r = spawnSync('edge-tts', [
-      '--voice', VOICE,
-      '--rate', RATE,
-      '--text', text,
-      '--write-media', mp3
-    ], { encoding: 'utf8' });
+  // 1. Вызов Silero через Python
+  const r = spawnSync('python3', [
+    path.join(__dirname, 'tts_silero.py'),
+    txtFile,
+    rawWav,
+    SPEAKER
+  ], { encoding: 'utf8' });
 
-    if (r.status === 0 && fs.existsSync(mp3) && fs.statSync(mp3).size > 1000) {
-      const r2 = spawnSync('ffmpeg', ['-y', '-i', mp3, '-ar', '44100', '-ac', '1', outWav], { encoding: 'utf8' });
-      if (r2.status === 0) {
-        console.log('голос: Edge-TTS (' + VOICE + ')');
-        return outWav;
-      }
-    }
-
-    lastErr = String(r.stderr || '').slice(-200);
-    console.warn('[WARN] edge-tts попытка ' + attempt + '/5 не удалась, пауза 5с...');
-    await new Promise(res => setTimeout(res, 5000));
+  if (r.status !== 0) {
+    throw new Error('Silero fail: ' + String(r.stderr || '').slice(-500));
   }
 
-  throw new Error('edge-tts не ответил после 5 попыток: ' + lastErr);
+  if (!fs.existsSync(rawWav) || fs.statSync(rawWav).size < 5000) {
+    throw new Error('Silero пусто');
+  }
+
+  // 2. Лёгкая обработка (чуть замедлить, чтобы звучало спокойнее)
+  // Убрали понижение тона, чтобы не было «демона»
+  const r2 = spawnSync('ffmpeg', [
+    '-y', '-i', rawWav,
+    '-af', 'atempo=0.92,apad=pad_dur=0.6',
+    '-ar', '44100', '-ac', '1', outWav
+  ], { encoding: 'utf8' });
+
+  if (r2.status !== 0) {
+    throw new Error('ffmpeg fail: ' + String(r2.stderr || '').slice(-500));
+  }
+
+  console.log('голос: Silero (' + SPEAKER + '), atempo 0.92');
+  return outWav;
 }
 
 module.exports = { tts };

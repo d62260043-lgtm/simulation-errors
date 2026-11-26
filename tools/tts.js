@@ -3,7 +3,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 // Голос: aidar или baya (baya звучит чуть спокойнее/старше)
-const SPEAKER = process.env.TTS_SPEAKER || 'baya';
+const SPEAKER = process.env.TTS_SPEAKER || 'aidar';
 
 async function tts(text, tmp, outWav) {
   const rawWav = path.join(tmp, 'raw_' + Date.now() + '.wav');

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { tts } = require('./tools/tts'); // ВАЖНО: тут путь к папке tools
+const { tts } = require('./tools/tts');
 
 const TMP = '/tmp/story_ep1';
 const W = 1080, H = 1920, FPS = 30;
@@ -15,6 +15,7 @@ function run(cmd, args) {
   }
   return r;
 }
+
 const ff = a => run('ffmpeg', a);
 const dur = f => parseFloat(String(run('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).stdout).trim());
 const tf = (n, t) => { const p = path.join(TMP, n); fs.writeFileSync(p, t); return p; };

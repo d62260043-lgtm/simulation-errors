@@ -32,9 +32,17 @@ const tf = (n, t) => { const p = path.join(TMP, n); fs.writeFileSync(p, t); retu
     const s = ep.scenes[i];
     console.log(`[Сцена ${i+1}/${ep.scenes.length}] Озвучка...`);
     
-audioSegs.push(padWav);
-const sDur = dur(padWav);
+    // 1. Озвучка (все эффекты голоса теперь внутри tts.js)
+    const rawWav = TMP + `/v${i}.wav`;
+    await tts(s.text, TMP, rawWav);
+    
+    const padWav = TMP + `/vp${i}.wav`;
+    ff(['-y', '-i', rawWav, '-ar', '44100', '-ac', '1', padWav]);
+    
+    audioSegs.push(padWav);
+    const sDur = dur(padWav);
 
+    // 2. Видео
     const imgPath = path.join(TMP, `img_${i}.jpg`);
     fs.copyFileSync(s.image, imgPath); 
 
@@ -48,7 +56,7 @@ const sDur = dur(padWav);
     let vf = `scale=4000:-1,zoompan=z='${zoomExpr}':d=1:s=${W}x${H}:fps=${FPS}`;
     
     if (s.zoom === 'shake') {
-   vf = `scale=4000:-1,zoompan=z='min(1.2,1+0.002*sin(on/2))':d=1:s=${W}x${H}:fps=${FPS}`;
+       vf = `scale=4000:-1,zoompan=z='min(1.2,1+0.002*sin(on/2))':d=1:s=${W}x${H}:fps=${FPS}`;
     }
 
     const lines = s.text.match(/.{1,25}(\s|$)/g) || [s.text];

@@ -32,13 +32,6 @@ const tf = (n, t) => { const p = path.join(TMP, n); fs.writeFileSync(p, t); retu
     const s = ep.scenes[i];
     console.log(`[Сцена ${i+1}/${ep.scenes.length}] Озвучка...`);
     
-    const rawWav = TMP + `/v${i}.wav`;
-await tts(s.text, TMP, rawWav);
-const padWav = TMP + `/vp${i}.wav`;
-
-// Голос мудрого старика: без сильного понижения, но медленный и мягкий
-ff(['-y', '-i', rawWav, '-af', 'aresample=44100,atempo=0.88,apad=pad_dur=0.8', '-ar', '44100', '-ac', '1', padWav]);   
-    
 audioSegs.push(padWav);
 const sDur = dur(padWav);
 
